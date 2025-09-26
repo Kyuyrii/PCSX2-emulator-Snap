@@ -45,18 +45,28 @@ apps:
       - bluez
       - udisks2
 
+  kvantum:
+    command-chain:
+      - snap/command-chain/gpu-2404-wrapper
+      - snap/command-chain/desktop-launch6
+    command: usr/bin/kvantummanager
+    environment:
+      SNAP_DESKTOP_RUNTIME: $SNAP/kf6
+      GTK_USE_PORTAL: "1"
+      QT_VERSION: "6"
+    plugs:
+      - desktop
+      - desktop-legacy
+      - opengl
+      - wayland
+      - x11
+      - home
+      - removable-media
+
 hooks:
   configure:
     command-chain:
       - snap/command-chain/hooks-configure-desktop
-
-package-repositories:
-  - type: apt
-    url: https://ppa.launchpadcontent.net/pcsx2-team/pcsx2-daily/ubuntu
-    suites: [noble]
-    components: [main]
-    architectures: [amd64]
-    key-id: D7B449CFE17E659E5A12EE8EDD6EEEA2BD747717
 
 plugs:
   desktop:
@@ -89,6 +99,34 @@ plugs:
   shared-memory:
     private: true
 
+layout:
+  /usr/share/X11:
+    symlink: $SNAP/kf6/usr/share/X11
+  /usr/share/qt6:
+    symlink: $SNAP/kf6/usr/share/qt6
+  /usr/share/libdrm:
+    bind: $SNAP/gpu-2404/libdrm
+  /usr/share/drirc.d:
+    symlink: $SNAP/gpu-2404/drirc.d
+  /etc/fonts:
+    bind: $SNAP/etc/fonts
+  /usr/share/color-schemes:
+    symlink: $SNAP/usr/share/color-schemes
+  /usr/share/Kvantum:
+    symlink: $SNAP/usr/share/Kvantum
+  /usr/share/kvantummanager/translations:
+    symlink: $SNAP/usr/share/kvantummanager/translations
+  /usr/share/kvantumpreview/translations:
+    symlink: $SNAP/usr/share/kvantumpreview/translations
+
+package-repositories:
+  - type: apt
+    url: https://ppa.launchpadcontent.net/pcsx2-team/pcsx2-daily/ubuntu
+    suites: [noble]
+    components: [main]
+    architectures: [amd64]
+    key-id: D7B449CFE17E659E5A12EE8EDD6EEEA2BD747717
+
 parts:
   pcsx2:
     plugin: nil
@@ -109,6 +147,35 @@ parts:
     prime:
       - usr/lib/x86_64-linux-gnu
 
+  kvantum:
+    after: [dependencies]
+    plugin: nil
+    source: https://github.com/tsujan/Kvantum.git
+    source-tag: V1.1.5
+    build-packages:
+      - cmake
+      - make
+    build-snaps:
+      - kde-qt6-core24-sdk
+      - kf6-core24-sdk
+    build-environment:
+      - PATH: /snap/kde-qt6-core24-sdk/current/usr/bin:/snap/kf6-core24-sdk/current/usr/bin${PATH:+:$PATH}
+      - XDG_DATA_DIRS: $CRAFT_STAGE/usr/share:/snap/kde-qt6-core24-sdk/current/usr/share:/snap/kf6-core24-sdk/current/usr/share:/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}
+      - XDG_CONFIG_HOME: $CRAFT_STAGE/etc/xdg:/snap/kde-qt6-core24-sdk/current/etc/xdg:/snap/kf6-core24-sdk/current/etc/xdg:/etc/xdg${XDG_CONFIG_HOME:+:$XDG_CONFIG_HOME}
+      - LD_LIBRARY_PATH: /snap/kde-qt6-core24-sdk/current/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}:/snap/kde-qt6-core24-sdk/current/usr/lib:/snap/kf6-core24-sdk/current/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}:/snap/kf6-core24-sdk/current/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}/blas:/snap/kf6-core24-sdk/current/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}/lapack:/snap/kf6-core24-sdk/current/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}/libproxy:/snap/kf6-core24-sdk/current/usr/lib:$CRAFT_STAGE/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/lib/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+      - CMAKE_PREFIX_PATH: $CRAFT_STAGE;/snap/kde-qt6-core24-sdk/current;/snap/kf6-core24-sdk/current;/usr${CMAKE_PREFIX_PATH:+;$CMAKE_PREFIX_PATH}
+      - CMAKE_FIND_ROOT_PATH: $CRAFT_STAGE;/snap/kde-qt6-core24-sdk/current;/snap/kf6-core24-sdk/current;/usr${CMAKE_FIND_ROOT_PATH:+;$CMAKE_FIND_ROOT_PATH}
+    override-build: |
+      cd Kvantum
+      mkdir build
+      cd build
+      cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+      make
+      make install DESTDIR=$CRAFT_PART_INSTALL
+      mkdir -p $CRAFT_PART_INSTALL/usr/lib/x86_64-linux-gnu/qt6/plugins/styles/
+      mv -f $CRAFT_PART_INSTALL/snap/kde-qt6-core24-sdk/current/usr/lib/x86_64-linux-gnu/qt6/plugins/styles/libkvantum.so $CRAFT_PART_INSTALL/usr/lib/x86_64-linux-gnu/qt6/plugins/styles/
+      rm -r $CRAFT_PART_INSTALL/snap/kde-qt6-core24-sdk/
+
   command-chain:
     plugin: nil
     source: ./launcher
@@ -126,15 +193,3 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/usr/share/applications/
       mv -f pcsx2-emulator.png $CRAFT_PART_INSTALL/usr/local/share/icons/hicolor/scalable/apps/
       mv -f pcsx2-emulator.desktop $CRAFT_PART_INSTALL/usr/share/applications/
-
-layout:
-  /usr/share/X11:
-    symlink: $SNAP/kf6/usr/share/X11
-  /usr/share/qt6:
-    symlink: $SNAP/kf6/usr/share/qt6
-  /usr/share/libdrm:
-    bind: $SNAP/gpu-2404/libdrm
-  /usr/share/drirc.d:
-    symlink: $SNAP/gpu-2404/drirc.d
-  /etc/fonts:
-    bind: $SNAP/etc/fonts
