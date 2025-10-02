@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Type=Application
+Name=PCSX2 [NyKyu]
+StartupWMClass=PCSX2
+GenericName=PlayStation 2 Emulator
+Comment=Sony PlayStation 2 emulator
+Exec=${SNAP}/usr/bin/pcsx2-qt
+Icon=${SNAP}/usr/share/icons/hicolor/scalable/apps/pcsx2-emulator.png
+Keywords=game;emulator;
+Categories=Game;Emulator;

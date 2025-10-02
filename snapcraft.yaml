@@ -1,0 +1,139 @@
+name: pcsx2-emulator
+base: core24
+version: '2.4.0'
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+summary: PlayStation 2 emulator
+description: |
+  PCSX2 is a free and open-source PlayStation 2 (PS2) emulator. Its purpose is to emulate the PS2's hardware, using a combination of MIPS CPU Interpreters, Recompilers, and a Virtual Machine which manages hardware states and PS2 system memory. This allows you to play PS2 games on your PC, with many additional features and benefits.
+
+  PlayStation 2 and PS2 are registered trademarks of Sony Interactive Entertainment. This application is not affiliated in any way with Sony Interactive Entertainment.
+grade: stable
+confinement: strict
+compression: lzo
+
+apps:
+  pcsx2-emulator:
+    command-chain:
+      - snap/command-chain/gpu-2404-wrapper
+      - snap/command-chain/desktop-launch6
+    command: usr/bin/pcsx2-qt
+    desktop: usr/share/applications/pcsx2-emulator.desktop
+    common-id: net.pcsx2.PCSX2
+    environment:
+      SNAP_DESKTOP_RUNTIME: $SNAP/kf6
+      GTK_USE_PORTAL: "1"
+      QT_VERSION: "6"
+    plugs:
+      - desktop
+      - desktop-legacy
+      - unity7
+      - opengl
+      - wayland
+      - x11
+      - screen-inhibit-control
+      - audio-playback
+      - network
+      - network-bind
+      - home
+      - removable-media
+      - mount-observe
+      - joystick
+      - bluez
+      - udisks2
+
+hooks:
+  configure:
+    command-chain:
+      - snap/command-chain/hooks-configure-desktop
+
+plugs:
+  desktop:
+    mount-host-font-cache: false
+  gtk-2-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
+  kf6-core24:
+    content: kf6-core24-all
+    interface: content
+    target: $SNAP/kf6
+    default-provider: kf6-core24
+  gpu-2404:
+    interface: content
+    target: $SNAP/gpu-2404
+    default-provider: mesa-2404
+  shared-memory:
+    private: true
+
+layout:
+  /usr/share/X11:
+    symlink: $SNAP/kf6/usr/share/X11
+  /usr/share/qt6:
+    symlink: $SNAP/kf6/usr/share/qt6
+  /usr/share/libdrm:
+    bind: $SNAP/gpu-2404/libdrm
+  /usr/share/drirc.d:
+    symlink: $SNAP/gpu-2404/drirc.d
+  /etc/fonts:
+    bind: $SNAP/etc/fonts
+
+package-repositories:
+  - type: apt
+    url: https://ppa.launchpadcontent.net/pcsx2-team/pcsx2-daily/ubuntu
+    suites: [noble]
+    components: [main]
+    architectures: [amd64]
+    key-id: D7B449CFE17E659E5A12EE8EDD6EEEA2BD747717
+
+parts:
+  pcsx2:
+    plugin: nil
+    stage-packages:
+      - pcsx2-stable
+      - pcsx2-patches
+    prime:
+      - usr/bin/pcsx2-qt
+      - usr/share/lintian/overrides/pcsx2-stable
+      - usr/share/menu/pcsx2-stable
+      - usr/share/PCSX2/resources
+      - usr/share/PCSX2/translations
+
+  dependencies:
+    plugin: nil
+    stage-packages:
+      - libpcap0.8t64
+    prime:
+      - usr/lib/x86_64-linux-gnu
+
+  command-chain:
+    plugin: nil
+    source: ./launcher
+    override-build: |
+      mkdir -p $CRAFT_PART_INSTALL/snap
+      mv -f command-chain $CRAFT_PART_INSTALL/snap/
+      chmod 777 $CRAFT_PART_INSTALL/snap/command-chain/*
+
+  pcsx2-gui-launcher:
+    after: [pcsx2]
+    plugin: nil
+    source: ./gui-launcher
+    override-build: |
+      mkdir -p $CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/
+      mkdir -p $CRAFT_PART_INSTALL/usr/share/applications/
+      mv -f pcsx2-emulator.png $CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/
+      mv -f pcsx2-emulator.desktop $CRAFT_PART_INSTALL/usr/share/applications/
