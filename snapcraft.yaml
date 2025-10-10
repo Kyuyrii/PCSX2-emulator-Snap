@@ -20,7 +20,7 @@ apps:
       - snap/command-chain/gpu-2404-wrapper
       - snap/command-chain/desktop-launch6
     command: usr/bin/pcsx2-qt
-    desktop: usr/share/applications/pcsx2-emulator.desktop
+    desktop: usr/share/applications/PCSX2.desktop
     common-id: net.pcsx2.PCSX2
     environment:
       SNAP_DESKTOP_RUNTIME: $SNAP/kf6
@@ -118,8 +118,15 @@ parts:
     stage-packages:
       - pcsx2-stable
       - pcsx2-patches
+    override-stage: |
+      craftctl default
+      sed -i 's|Name=PCSX2|Name=PCSX2 [NyKyu]|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
+      sed -i 's|Exec=pcsx2-qt|Exec=${SNAP}/usr/bin/pcsx2-qt|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
+      sed -i 's|Icon=PCSX2|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/PCSX2.png|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
     prime:
       - usr/bin/pcsx2-qt
+      - usr/share/applications/PCSX2.desktop
+      - usr/share/icons/hicolor/256x256/apps/PCSX2.png
       - usr/share/lintian/overrides/pcsx2-stable
       - usr/share/menu/pcsx2-stable
       - usr/share/PCSX2/resources
@@ -139,13 +146,3 @@ parts:
       mkdir -p $CRAFT_PART_INSTALL/snap
       mv -f command-chain $CRAFT_PART_INSTALL/snap/
       chmod 777 $CRAFT_PART_INSTALL/snap/command-chain/*
-
-  pcsx2-gui-launcher:
-    after: [pcsx2]
-    plugin: nil
-    source: ./gui-launcher
-    override-build: |
-      mkdir -p $CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/
-      mkdir -p $CRAFT_PART_INSTALL/usr/share/applications/
-      mv -f pcsx2-emulator.png $CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/
-      mv -f pcsx2-emulator.desktop $CRAFT_PART_INSTALL/usr/share/applications/
