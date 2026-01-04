@@ -1,6 +1,6 @@
 name: pcsx2-emulator
 base: core24
-version: '2.4.0'
+version: '2.6.0'
 platforms:
   amd64:
     build-on: [amd64]
@@ -55,10 +55,6 @@ hooks:
 plugs:
   desktop:
     mount-host-font-cache: false
-  gtk-2-themes:
-    interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes
   gtk-3-themes:
     interface: content
     target: $SNAP/data-dir/themes
@@ -121,7 +117,6 @@ parts:
     override-stage: |
       craftctl default
       sed -i 's|Name=PCSX2|Name=PCSX2 [NyKyu]|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
-      sed -i 's|Exec=pcsx2-qt|Exec=${SNAP}/usr/bin/pcsx2-qt|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
       sed -i 's|Icon=PCSX2|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/PCSX2.png|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
     prime:
       - usr/bin/pcsx2-qt
