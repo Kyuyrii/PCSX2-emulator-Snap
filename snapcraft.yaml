@@ -131,6 +131,7 @@ parts:
     plugin: nil
     stage-packages:
       - libpcap0.8t64
+      - libshaderc1
     prime:
       - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/
 
