@@ -22,8 +22,8 @@ apps:
     common-id: net.pcsx2.PCSX2
     environment:
       QT_QPA_PLATFORMTHEME: xdgdesktopportal
-      LD_LIBRARY_PATH: $SNAP/lxqt-support/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
-      QT_PLUGIN_PATH: $SNAP/lxqt-support/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins:$QT_PLUGIN_PATH
+      LD_LIBRARY_PATH: $SNAP/lxqt-support-core24/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+      QT_PLUGIN_PATH: $SNAP/lxqt-support-core24/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins:$QT_PLUGIN_PATH
     extensions: [kde-neon-6]
     plugs:
       - screen-inhibit-control
@@ -37,17 +37,17 @@ apps:
 plugs:
   shared-memory:
     private: true
-  lxqt-support:
-    content: lxqt-support
+  lxqt-support-core24:
+    content: lxqt-support-core24
     interface: content
-    target: $SNAP/lxqt-support
-    default-provider: lxqt-support
+    target: $SNAP/lxqt-support-core24
+    default-provider: lxqt-support-core24
 
 layout:
   /usr/share/color-schemes:
-    symlink: $SNAP/lxqt-support/usr/share/color-schemes
+    symlink: $SNAP/lxqt-support-core24/usr/share/color-schemes
   /usr/share/Kvantum:
-    symlink: $SNAP/lxqt-support/usr/share/Kvantum
+    symlink: $SNAP/lxqt-support-core24/usr/share/Kvantum
 
 package-repositories:
   - type: apt
@@ -65,7 +65,7 @@ parts:
       - pcsx2-patches
     override-build: |
       craftctl default
-      sed -i 's|Name=PCSX2|Name=PCSX2 [NyKyu]|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
+      sed -i 's|Name=PCSX2|Name=PCSX2 [Kyu]|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
     prime:
       - usr/bin/pcsx2-qt
       - usr/share/applications/PCSX2.desktop
