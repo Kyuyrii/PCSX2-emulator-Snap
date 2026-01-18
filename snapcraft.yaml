@@ -65,7 +65,7 @@ parts:
       - pcsx2-patches
     override-build: |
       craftctl default
-      sed -i 's|Name=PCSX2|Name=PCSX2 [Kyu]|' $CRAFT_STAGE/usr/share/applications/PCSX2.desktop
+      sed -i 's|Name=PCSX2|Name=PCSX2 [Kyu]|' $CRAFT_PART_INSTALL/usr/share/applications/PCSX2.desktop
     prime:
       - usr/bin/pcsx2-qt
       - usr/share/applications/PCSX2.desktop
