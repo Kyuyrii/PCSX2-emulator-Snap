@@ -1,6 +1,6 @@
 name: pcsx2-emulator
 base: core24
-version: 2.6.0
+version: 2.6.1
 platforms:
   amd64:
     build-on: [amd64]
