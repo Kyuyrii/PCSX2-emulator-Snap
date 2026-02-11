@@ -1,6 +1,6 @@
 name: pcsx2-emulator
 base: core24
-version: 2.6.2
+adopt-info: pcsx2-app
 platforms:
   amd64:
     build-on: [amd64]
@@ -16,14 +16,14 @@ icon: AppIconLarge.png
 
 apps:
   pcsx2-emulator:
-    command-chain: [snap/command-chain/unset-qt_qpa_platform]
+    command-chain: [snap/command-chain/desktop-launch-pcsx2]
     command: usr/bin/pcsx2-qt
     desktop: usr/share/applications/PCSX2.desktop
     common-id: net.pcsx2.PCSX2
     environment:
       QT_QPA_PLATFORMTHEME: xdgdesktopportal
-      LD_LIBRARY_PATH: $SNAP/lxqt-support-core24/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
-      QT_PLUGIN_PATH: $SNAP/lxqt-support-core24/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins:$QT_PLUGIN_PATH
+      LD_LIBRARY_PATH: $SNAP/lxqt-support/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+      QT_PLUGIN_PATH: $SNAP/lxqt-support/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins:$QT_PLUGIN_PATH
     extensions: [kde-neon-6]
     plugs:
       - screen-inhibit-control
@@ -40,14 +40,12 @@ plugs:
   lxqt-support-core24:
     content: lxqt-support-core24
     interface: content
-    target: $SNAP/lxqt-support-core24
+    target: $SNAP/lxqt-support
     default-provider: lxqt-support-core24
 
 layout:
-  /usr/share/color-schemes:
-    symlink: $SNAP/lxqt-support-core24/usr/share/color-schemes
   /usr/share/Kvantum:
-    symlink: $SNAP/lxqt-support-core24/usr/share/Kvantum
+    symlink: $SNAP/lxqt-support/usr/share/Kvantum
 
 package-repositories:
   - type: apt
@@ -59,12 +57,14 @@ package-repositories:
 
 parts:
   pcsx2-app:
-    plugin: dump
-    source: http://ppa.launchpad.net/pcsx2-team/pcsx2-daily/ubuntu/pool/main/p/pcsx2-stable/pcsx2-stable_$SNAPCRAFT_PROJECT_VERSION~ubuntu24.04.1_amd64.deb
+    plugin: nil
     stage-packages:
+      - pcsx2-stable
       - pcsx2-patches
-    override-build: |
+    override-stage: |
       craftctl default
+      VERSION=$(dpkg-parsechangelog -l $CRAFT_PART_INSTALL/usr/share/doc/pcsx2-stable/changelog.gz -S Version | cut -d'~' -f1)
+      craftctl set version="$VERSION"
       sed -i 's|Name=PCSX2|Name=PCSX2 [Kyu]|' $CRAFT_PART_INSTALL/usr/share/applications/PCSX2.desktop
     prime:
       - usr/bin/pcsx2-qt
@@ -82,11 +82,12 @@ parts:
       - libpcap0.8t64
       - libshaderc1
     prime:
-      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/
+      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libpcap.so*
+      - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libshaderc.so*
 
   command-chain:
     after: [dependencies]
     plugin: dump
     source: ./command-chain/
     organize:
-      unset-qt_qpa_platform: snap/command-chain/unset-qt_qpa_platform
+      desktop-launch-pcsx2: snap/command-chain/desktop-launch-pcsx2

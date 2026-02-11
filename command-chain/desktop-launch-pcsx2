@@ -1,0 +1,18 @@
+#!/bin/bash
+
+unset QT_QPA_PLATFORM
+
+export XDG_CONFIG_HOME="$SNAP_USER_COMMON/.config"
+export XDG_DATA_HOME="$SNAP_USER_COMMON/.local/share"
+export XDG_CACHE_HOME="$SNAP_USER_COMMON/.cache"
+
+mkdir -p "$XDG_CONFIG_HOME"
+mkdir -p "$XDG_DATA_HOME"
+mkdir -p "$XDG_CACHE_HOME"
+
+if [ -d "$SNAP_USER_DATA/.config/PCSX2" ]; then
+    cp -r "$SNAP_USER_DATA/.config/PCSX2" "$SNAP_USER_COMMON/.config/"
+    rm -rf "$SNAP_USER_DATA/.config/PCSX2"
+fi
+
+exec "$@"
